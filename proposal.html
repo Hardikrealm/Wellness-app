@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindfully Yours — Technical Proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-muted: #888;
+    --ink-faint: #bbb;
+    --paper: #fafaf7;
+    --paper-tint: #f3f2ee;
+    --paper-warm: #ede9e0;
+    --rule: #e0ddd5;
+    --rule-strong: #c8c4ba;
+    --accent: #2d5a3d;
+    --accent-light: #e8f0ea;
+    --accent-mid: #4a7c5f;
+    --gold: #8b6914;
+    --gold-light: #f5f0e0;
+    --red: #8b2020;
+    --red-light: #f5e8e8;
+    --blue: #1e3a5f;
+    --blue-light: #e8eef5;
+    --purple: #3d2060;
+    --purple-light: #ece8f5;
+    --orange: #7a3510;
+    --orange-light: #f5ece5;
+    --ff-display: 'Fraunces', Georgia, serif;
+    --ff-body: 'DM Sans', system-ui, sans-serif;
+    --ff-mono: 'DM Mono', 'Courier New', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--ff-body); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 240px; background: var(--paper-tint); border-right: 1px solid var(--rule); overflow-y: auto; z-index: 100; padding: 28px 0 40px; }
+  .sidebar-brand { padding: 0 20px 24px; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
+  .sidebar-brand .logo { font-family: var(--ff-display); font-size: 16px; font-weight: 500; color: var(--accent); letter-spacing: -0.3px; line-height: 1.3; }
+  .sidebar-brand .sub { font-size: 11px; color: var(--ink-muted); margin-top: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav-section { padding: 6px 20px 4px; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; margin-top: 8px; }
+  .nav-item { display: block; padding: 6px 20px; font-size: 13px; color: var(--ink-soft); text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; line-height: 1.4; }
+  .nav-item:hover { background: var(--paper-warm); color: var(--ink); border-left-color: var(--accent-mid); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  .main { margin-left: 240px; min-height: 100vh; }
+  .cover { background: var(--ink); color: white; padding: 80px 80px 72px; position: relative; overflow: hidden; }
+  .cover::before { content: ''; position: absolute; top: -60px; right: -60px; width: 340px; height: 340px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.06); }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 120px; width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.04); }
+  .cover-tag { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; margin-bottom: 32px; font-family: var(--ff-mono); }
+  .cover h1 { font-family: var(--ff-display); font-size: 52px; font-weight: 300; line-height: 1.12; letter-spacing: -1.5px; margin-bottom: 8px; max-width: 640px; }
+  .cover h1 em { font-style: italic; color: rgba(255,255,255,0.55); }
+  .cover-sub { font-size: 16px; color: rgba(255,255,255,0.5); margin-top: 20px; max-width: 500px; line-height: 1.6; font-weight: 300; }
+  .cover-meta { display: flex; gap: 40px; margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.1); }
+  .cover-meta-item .label { font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 4px; font-family: var(--ff-mono); }
+  .cover-meta-item .value { font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 400; }
+  .page { padding: 64px 80px; border-bottom: 1px solid var(--rule); max-width: 900px; }
+  .page:last-child { border-bottom: none; }
+  .section-number { font-family: var(--ff-mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.5px; margin-bottom: 8px; }
+  h2.page-title { font-family: var(--ff-display); font-size: 34px; font-weight: 400; letter-spacing: -0.8px; color: var(--ink); line-height: 1.15; margin-bottom: 32px; }
+  h3.section-head { font-family: var(--ff-display); font-size: 20px; font-weight: 500; color: var(--ink); letter-spacing: -0.3px; margin: 40px 0 12px; line-height: 1.3; }
+  h3.section-head:first-child { margin-top: 0; }
+  h4.sub-head { font-size: 13px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 0.6px; margin: 28px 0 8px; }
+  p { margin-bottom: 14px; color: var(--ink-soft); }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 500; }
+  .callout { border-left: 3px solid; padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 24px 0; font-size: 14px; line-height: 1.65; }
+  .callout.green { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .callout.gold { border-color: var(--gold); background: var(--gold-light); color: var(--gold); }
+  .callout.red { border-color: var(--red); background: var(--red-light); color: var(--red); }
+  .callout.blue { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+  .callout.purple { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
+  .callout-title { font-weight: 600; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; opacity: 0.8; font-family: var(--ff-mono); }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  .feature-card { background: white; border: 1px solid var(--rule); border-radius: 8px; padding: 20px; }
+  .feature-card .fc-tag { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+  .feature-card h5 { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 8px; line-height: 1.3; }
+  .feature-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+  .feature-card .tech-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: var(--ff-mono); font-size: 10.5px; font-weight: 500; }
+  .pill.green { background: var(--accent-light); color: var(--accent); }
+  .pill.blue { background: var(--blue-light); color: var(--blue); }
+  .pill.gold { background: var(--gold-light); color: var(--gold); }
+  .pill.purple { background: var(--purple-light); color: var(--purple); }
+  .pill.red { background: var(--red-light); color: var(--red); }
+  .pill.orange { background: var(--orange-light); color: var(--orange); }
+  .pill.gray { background: var(--paper-warm); color: var(--ink-soft); }
+  .stack-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 20px 0; }
+  .stack-table th { text-align: left; padding: 8px 14px; font-size: 10px; letter-spacing: 0.7px; text-transform: uppercase; color: var(--ink-muted); border-bottom: 1.5px solid var(--rule-strong); font-family: var(--ff-mono); font-weight: 500; }
+  .stack-table td { padding: 11px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink-soft); line-height: 1.5; }
+  .stack-table tr:last-child td { border-bottom: none; }
+  .stack-table tr:hover td { background: var(--paper-tint); }
+  .stack-table td:first-child { font-weight: 500; color: var(--ink); width: 180px; }
+  .stack-table td code { font-family: var(--ff-mono); font-size: 12px; background: var(--paper-warm); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+  .journey { margin: 24px 0; }
+  .journey-step { display: flex; gap: 20px; margin-bottom: 0; position: relative; }
+  .journey-step::before { content: ''; position: absolute; left: 16px; top: 36px; bottom: -12px; width: 1px; background: var(--rule); }
+  .journey-step:last-child::before { display: none; }
+  .journey-num { width: 32px; height: 32px; border-radius: 50%; background: var(--paper-warm); border: 1px solid var(--rule-strong); display: flex; align-items: center; justify-content: center; font-family: var(--ff-mono); font-size: 12px; color: var(--ink-soft); flex-shrink: 0; margin-top: 2px; font-weight: 500; }
+  .journey-content { padding-bottom: 28px; flex: 1; }
+  .journey-content h5 { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .journey-content p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  .pricing-card { border: 1px solid var(--rule); border-radius: 10px; padding: 28px 24px; background: white; }
+  .pricing-card.featured { border-color: var(--accent-mid); background: var(--accent-light); }
+  .pricing-card .price { font-family: var(--ff-display); font-size: 36px; font-weight: 400; color: var(--ink); letter-spacing: -1px; line-height: 1; margin: 12px 0 4px; }
+  .pricing-card .price-label { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.3px; margin-bottom: 20px; font-family: var(--ff-mono); }
+  .pricing-card .tier-name { font-size: 12px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--ink-muted); font-family: var(--ff-mono); }
+  .pricing-card ul { list-style: none; font-size: 13px; color: var(--ink-soft); }
+  .pricing-card ul li { padding: 5px 0; border-bottom: 1px solid var(--rule); line-height: 1.5; }
+  .pricing-card ul li:last-child { border-bottom: none; }
+  .pricing-card ul li::before { content: '→ '; color: var(--accent); font-size: 12px; }
+  .risk-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); align-items: flex-start; }
+  .risk-item:last-child { border-bottom: none; }
+  .risk-badge { font-family: var(--ff-mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; letter-spacing: 0.3px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .risk-badge.high { background: var(--red-light); color: var(--red); }
+  .risk-badge.med { background: var(--gold-light); color: var(--gold); }
+  .risk-badge.low { background: var(--accent-light); color: var(--accent); }
+  .risk-text h6 { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .risk-text p { font-size: 12.5px; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+  .divider { height: 1px; background: var(--rule); margin: 32px 0; }
+  .timeline { margin: 24px 0; }
+  .tl-row { display: grid; grid-template-columns: 120px 1fr; gap: 20px; margin-bottom: 16px; align-items: start; }
+  .tl-label { font-family: var(--ff-mono); font-size: 11px; color: var(--ink-muted); padding-top: 4px; text-align: right; }
+  .tl-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .tl-bar { height: 6px; border-radius: 3px; margin-bottom: 4px; }
+  .tl-items { font-size: 12px; color: var(--ink-muted); line-height: 1.5; }
+  .checklist { margin: 16px 0; }
+  .check-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 13.5px; align-items: flex-start; }
+  .check-item:last-child { border-bottom: none; }
+  .check-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+  .check-dot.done { background: var(--accent); color: white; }
+  .check-dot.warn { background: var(--gold); color: white; }
+  .check-dot.req { background: var(--blue); color: white; }
+  .check-text { color: var(--ink-soft); line-height: 1.5; }
+  .check-text strong { color: var(--ink); display: block; font-size: 13.5px; }
+  .infra-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .infra-card { background: white; border: 1px solid var(--rule); border-radius: 6px; padding: 16px; }
+  .infra-card .ic-service { font-family: var(--ff-mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.3px; margin-bottom: 6px; }
+  .infra-card h6 { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 6px; }
+  .infra-card p { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .mini-card { background: white; border: 1px solid var(--rule); border-radius: 6px; padding: 14px; }
+  .mini-card .mc-label { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+  .mini-card .mc-val { font-size: 22px; font-family: var(--ff-display); font-weight: 400; color: var(--ink); letter-spacing: -0.5px; line-height: 1; margin-bottom: 4px; }
+  .mini-card p { font-size: 12px; color: var(--ink-muted); margin: 0; line-height: 1.4; }
+  .full-row { background: var(--paper-warm); border: 1px solid var(--rule); border-radius: 8px; padding: 20px 24px; margin: 20px 0; }
+  .full-row h5 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .full-row p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.6; }
+  code { font-family: var(--ff-mono); font-size: 12px; background: var(--paper-warm); padding: 1px 5px; border-radius: 3px; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 2px; }
+  @media print { .sidebar { display: none; } .main { margin-left: 0; } .page { padding: 48px 60px; } }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">Mindfully Yours</div>
+    <div class="sub">Platform Proposal · 2026</div>
+  </div>
+  <div class="nav-section">Overview</div>
+  <a href="#cover" class="nav-item active">Cover & Vision</a>
+  <a href="#summary" class="nav-item">Executive Summary</a>
+  <a href="#platform" class="nav-item">Platform Architecture</a>
+  <div class="nav-section">Product</div>
+  <a href="#mhu" class="nav-item">MHU Features</a>
+  <a href="#mhp" class="nav-item">MHP Features</a>
+  <a href="#admin" class="nav-item">Admin Dashboard</a>
+  <a href="#ai" class="nav-item">AI & Triage Engine</a>
+  <div class="nav-section">Technical</div>
+  <a href="#stack" class="nav-item">Tech Stack</a>
+  <a href="#infra" class="nav-item">Infrastructure</a>
+  <a href="#security" class="nav-item">Security & Privacy</a>
+  <a href="#data" class="nav-item">Data Architecture</a>
+  <div class="nav-section">Delivery</div>
+  <a href="#phases" class="nav-item">Phases & Timeline</a>
+  <a href="#compliance" class="nav-item">Compliance</a>
+  <a href="#risks" class="nav-item">Risks & Mitigations</a>
+  <a href="#pricing" class="nav-item">Engagement & Pricing</a>
+</nav>
+
+<main class="main">
+
+<section class="cover" id="cover">
+  <div class="cover-tag">Confidential · Prepared for Mindfully Yours Pvt Ltd</div>
+  <h1>Mindfully Yours<br><em>Platform Proposal</em></h1>
+  <p class="cover-sub">A comprehensive technical, product, and delivery blueprint for India's first AI-driven end-to-end mental wellness platform — connecting users to care, intelligently.</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">Prepared for</div>
+      <div class="value">Pranav Joshi & Shreya Aras</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Company</div>
+      <div class="value">Mindfully Yours Pvt Ltd</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Date</div>
+      <div class="value">May 2026</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Version</div>
+      <div class="value">v2.0 — Detailed</div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="summary">
+  <div class="section-number">01 · Executive Summary</div>
+  <h2 class="page-title">The Case for Building This</h2>
+  <p>India has one of the largest unmet mental health burdens in the world — over 197 million people suffer from some form of mental illness, yet fewer than 3% receive any care. The gap is not simply a shortage of professionals; it is a systems problem. People don't know where to start, can't identify whether they need professional help, don't know how to find credible therapists, and when they do, the entire experience — discovery, booking, payment, continuity — is fragmented and anxiety-inducing in itself.</p>
+  <p><strong>Mindfully Yours</strong> is a platform that solves every step of that journey end-to-end: from a person's first acknowledgment that they are struggling, all the way through to sustained, quality therapeutic care — with an AI companion holding their hand throughout.</p>
+  <div class="three-col">
+    <div class="mini-card">
+      <div class="mc-label">User Types</div>
+      <div class="mc-val">3</div>
+      <p>MHU · MHP · Admin — distinct interfaces, access rights, and data models</p>
+    </div>
+    <div class="mini-card">
+      <div class="mc-label">Product Surfaces</div>
+      <div class="mc-val">5</div>
+      <p>Mobile app · MHU portal · MHP portal · Admin dashboard · Backend API</p>
+    </div>
+    <div class="mini-card">
+      <div class="mc-label">Build Phases</div>
+      <div class="mc-val">4</div>
+      <p>Foundation → Core Build → MHP & Admin → QA, Compliance & Launch</p>
+    </div>
+  </div>
+  <div class="callout green">
+    <div class="callout-title">Core Thesis</div>
+    The platform is not a directory of therapists. It is not a meditation app. It is not a chatbot. It is the only product in India that guides a user from emotional awareness all the way to sustained clinical care — with an intelligent AI companion acting as the thread between every touchpoint.
+  </div>
+  <h3 class="section-head">What This Document Covers</h3>
+  <p>This proposal covers every technical decision, every product feature at micro-level, every infrastructure consideration, every user journey edge case, all compliance requirements, the phased delivery plan, risk analysis, and engagement terms. It is intended to be the single source of truth from which the PRD, design brief, and development brief will all derive.</p>
+</section>
+
+<section class="page" id="platform">
+  <div class="section-number">02 · Platform Architecture</div>
+  <h2 class="page-title">What Gets Built & How It Fits Together</h2>
+  <p>The platform comprises five distinct product surfaces sharing a single backend API layer. The architecture ensures all surfaces share the same data model, business logic, and authentication system — but present radically different experiences based on user role.</p>
+  <h3 class="section-head">Product Surfaces</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Surface 01</div>
+      <h5>Mobile App — MHU + MHP (Shared, Two Roles)</h5>
+      <p>A single Flutter codebase serving both Mental Health Users and Mental Health Professionals. Post-login, the app detects role and renders an entirely different experience. MHUs see their wellness journey; MHPs see their professional dashboard. Shared infrastructure, zero duplicated builds.</p>
+      <div class="tech-pills">
+        <span class="pill green">Flutter 3.x</span><span class="pill blue">Riverpod</span><span class="pill gray">iOS + Android</span><span class="pill purple">WebRTC</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Surface 02</div>
+      <h5>Web Portal — MHU</h5>
+      <p>A browser-based companion to the mobile app. MHUs access their full mental health archive, session history, AI companion conversation logs, personalised wellness plans, and resource library from desktop. Particularly useful for users who prefer keyboard interfaces or access the platform during work hours.</p>
+      <div class="tech-pills">
+        <span class="pill blue">Next.js 14</span><span class="pill green">SSR</span><span class="pill gold">Tailwind CSS</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Surface 03</div>
+      <h5>Web Portal — MHP</h5>
+      <p>A professional-grade desktop interface for therapists and psychiatrists. Calendar management, patient history access, session preparation tools, consultation note-taking, document sharing, payout visibility, and supervisory tools. Desktop-first because MHPs work on computers during clinical hours.</p>
+      <div class="tech-pills">
+        <span class="pill blue">Next.js 14</span><span class="pill purple">Role-based routing</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Surface 04</div>
+      <h5>Admin Dashboard</h5>
+      <p>Internal operations command centre. MHU and MHP onboarding management, credential verification workflows, MIS reporting, complaint tracking, payment reconciliation, payout management, content moderation, and legal compliance monitoring. Access is tiered — not all admin users see all data.</p>
+      <div class="tech-pills">
+        <span class="pill blue">Next.js</span><span class="pill red">RBAC-tiered</span><span class="pill gray">Shadcn/ui</span>
+      </div>
+    </div>
+  </div>
+  <div class="feature-card" style="margin-top:0; border-color: var(--rule-strong);">
+    <div class="fc-tag">Surface 05 — Backbone</div>
+    <h5>Backend API Layer</h5>
+    <p>The central nervous system of the entire platform. Built on Node.js (NestJS), it powers authentication, the AI triage engine, matchmaking algorithm, scheduling engine, payment processing, notification dispatch, file storage, analytics pipelines, and all inter-service communication. Exposes REST API to all five surfaces with WebSocket support for real-time features.</p>
+    <div class="tech-pills">
+      <span class="pill blue">Node.js</span><span class="pill green">NestJS</span><span class="pill gray">REST + WebSocket</span><span class="pill gold">PostgreSQL</span><span class="pill purple">MongoDB</span><span class="pill orange">Redis</span>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="mhu">
+  <div class="section-number">03 · Product — Mental Health User (MHU)</div>
+  <h2 class="page-title">The Complete MHU Experience</h2>
+  <p>Every feature has been designed from the perspective of a first-time user who may be scared, embarrassed, or unsure whether they even need help. The experience must be warm, non-clinical in tone, non-judgmental in framing, and progressive in how it builds trust.</p>
+
+  <h3 class="section-head">3.1 Onboarding & Registration</h3>
+  <div class="journey">
+    <div class="journey-step">
+      <div class="journey-num">1</div>
+      <div class="journey-content">
+        <h5>Anonymous Entry — Guest Mode</h5>
+        <p>Users explore the app and interact with a limited AI companion before creating an account. Full registration is only required before booking a session or saving progress. Reduces friction for uncertain users. <span class="pill gray">No sign-up wall</span></p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">2</div>
+      <div class="journey-content">
+        <h5>Registration — OTP + Email</h5>
+        <p>Mobile number verified via OTP (MSG91). Email optionally linked for receipts and notifications. No mandatory personal details beyond phone number at sign-up. Name, age, gender, and location collected progressively as context is needed. bcrypt password hashing, JWT-based sessions, refresh token rotation. <span class="pill blue">JWT + OTP</span></p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">3</div>
+      <div class="journey-content">
+        <h5>Preference Capture</h5>
+        <p>Post-registration: 5-question preference screen capturing preferred language, preferred therapist gender, openness to online vs in-person sessions, and notification preferences. Stored as user preference vector in PostgreSQL, fed directly into the matchmaking algorithm.</p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">4</div>
+      <div class="journey-content">
+        <h5>AI Companion Introduction</h5>
+        <p>First-time users are introduced to the AI companion — not as a chatbot, but as a named, consistent digital presence. The companion explains its role, asks a gentle opening question, and begins the triage process conversationally. No forms, no cold questionnaires.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="section-head">3.2 AI Digital Companion</h3>
+  <div class="callout blue">
+    <div class="callout-title">Core Feature — Central to Entire Platform</div>
+    The AI companion is not a support feature — it is the primary entry point, the engagement layer between sessions, the bridge to the MHP, and the longitudinal record-keeper of the user's mental health journey. Everything else on the MHU side exists in relationship to this companion.
+  </div>
+  <table class="stack-table">
+    <thead><tr><th>Capability</th><th>Detail</th><th>Tech</th></tr></thead>
+    <tbody>
+      <tr><td>Conversational AI</td><td>Natural language chat with emotional intelligence. Recognises distress signals, validates feelings without diagnosing, redirects to professional care when appropriate. Context retained across sessions using vector embeddings of conversation history.</td><td><span class="pill blue">LLM (Claude / GPT-4)</span> <span class="pill purple">Vector DB</span></td></tr>
+      <tr><td>Memory & Continuity</td><td>The companion remembers what the user shared in previous sessions. Implemented via RAG (Retrieval-Augmented Generation) — conversation summaries stored in MongoDB, embedded, and retrieved per-session for contextual responses without bloated context windows.</td><td><span class="pill purple">RAG Architecture</span> <span class="pill gold">MongoDB</span></td></tr>
+      <tr><td>Structured Triage</td><td>Validated screening tools (PHQ-9, GAD-7, PCL-5) embedded conversationally — questions woven into dialogue, not presented as forms. Scores interpreted by the AI and mapped to a recommended care level. Clinical validation with Shreya required before launch.</td><td><span class="pill green">Custom Prompt Engine</span> <span class="pill blue">Scoring API</span></td></tr>
+      <tr><td>Between-Session Engagement</td><td>Daily mood check-in prompts, personalised coping exercises, journaling nudges, and psychoeducation content curated by the companion based on the user's triage profile and recent conversations.</td><td><span class="pill orange">FCM Push</span> <span class="pill gray">Content CMS</span></td></tr>
+      <tr><td>Therapist Briefing Export</td><td>Before each session, the companion generates a structured summary of the user's recent check-ins, mood trends, and key themes. Shared with assigned MHP through the platform — no personal numbers or emails exchanged directly.</td><td><span class="pill blue">NestJS Service</span> <span class="pill gold">PDF Generation</span></td></tr>
+      <tr><td>Crisis Detection</td><td>Real-time sentiment and keyword analysis on all companion messages. Flags suicidal ideation, acute distress, and crisis language. Triggers escalation protocol automatically. See Section 3.6 for full specification.</td><td><span class="pill red">Risk Classifier</span> <span class="pill orange">Alert System</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">3.3 Mood Tracking System</h3>
+  <p>A persistent longitudinal mood log serving both user self-awareness and MHP clinical context. Deeply integrated with companion conversations and session history — not a standalone feature.</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Input Method</div>
+      <h5>Multi-Modal Mood Logging</h5>
+      <p>Users log mood via a 1–10 scale slider, an emotion wheel (Plutchik's model), a free-text journal entry, and optional image/audio attachment. Each log timestamped and linked to the day's companion conversation context.</p>
+      <div class="tech-pills"><span class="pill blue">Flutter Sliders</span><span class="pill gold">MongoDB time-series</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Analytics Layer</div>
+      <h5>Mood Trend Visualisation</h5>
+      <p>7-day, 30-day, and 90-day mood trend charts displayed in-app. Backend computes rolling averages, identifies weekly patterns, and surfaces insights. Shared with MHP dashboard with explicit consent toggle.</p>
+      <div class="tech-pills"><span class="pill green">Chart widgets</span><span class="pill blue">Analytics API</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Well-being Trackers</div>
+      <h5>Sleep, Activity & Stress Logs</h5>
+      <p>Optional trackers for sleep hours, physical activity, and daily stress rating. Optionally synced with Apple Health / Google Fit in Phase 2. Trends correlated with mood data for richer companion context.</p>
+      <div class="tech-pills"><span class="pill purple">Phase 2</span><span class="pill blue">HealthKit</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Progress Reports</div>
+      <h5>AI-Generated Quarterly Summaries</h5>
+      <p>AI-generated quarterly progress summaries based on mood trend, session attendance, and companion engagement. Framed as celebration of progress, not clinical assessment. Downloadable as PDF.</p>
+      <div class="tech-pills"><span class="pill green">AI Report Engine</span><span class="pill gold">PDF Export</span></div>
+    </div>
+  </div>
+
+  <h3 class="section-head">3.4 Therapist Discovery & Smart Matching</h3>
+  <div class="callout gold">
+    <div class="callout-title">Matching Criteria Matrix</div>
+    Every MHU matched using a weighted scoring algorithm: clinical specialisation (30%) · preferred language (25%) · session format — online/in-person (20%) · therapist availability windows (15%) · location for in-person sessions (10%). All weights are configurable from the admin panel.
+  </div>
+  <table class="stack-table">
+    <thead><tr><th>Feature</th><th>Description</th><th>Stack</th></tr></thead>
+    <tbody>
+      <tr><td>AI Recommendation</td><td>Based on triage output, companion proactively recommends 3 MHPs ranked by match score. Reasoning shown to user ("recommended because they specialise in anxiety and speak Hindi"). User can accept or browse freely.</td><td><span class="pill purple">Matching Engine</span></td></tr>
+      <tr><td>Filter & Browse</td><td>MHUs can manually filter MHP profiles by specialisation, language, years of experience, session format, price range, and rating. Full-text search on MHP bio. Indexed PostgreSQL queries.</td><td><span class="pill gold">PostgreSQL</span> <span class="pill blue">Elasticsearch (P2)</span></td></tr>
+      <tr><td>MHP Profile Cards</td><td>Each profile shows: verified badge, specialisations, languages spoken, session formats, pricing, average rating, session count, and short bio. Photo upload required. Hosted on S3/CloudFront.</td><td><span class="pill green">S3 + CloudFront</span></td></tr>
+      <tr><td>Intro Consultation</td><td>MHUs can book a 20-minute introductory consult with a new MHP before committing to a full session. Discounted rate. Tracked separately in analytics. Reduces mismatch anxiety.</td><td><span class="pill gold">Razorpay</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">3.5 Booking & Scheduling Engine</h3>
+  <p>The scheduling system handles real-world complexity: timezone differences (NRI users), last-minute cancellations, buffer time between sessions, no-show logic, and showing only MHP slots that match the user's criteria — not raw calendar availability.</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Slot Selection</div>
+      <h5>Calendar UI</h5>
+      <p>Date-picker showing only available dates for selected MHP. Slots filtered by MHU preferred time-of-day and MHP availability windows. Unavailable slots greyed. Timezone auto-converted for NRI users (detected from device locale).</p>
+      <div class="tech-pills"><span class="pill blue">Flutter Calendar</span><span class="pill gray">Timezone API</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Conflict Prevention</div>
+      <h5>Slot Locking</h5>
+      <p>When user selects a slot, it is soft-locked for 5 minutes while payment completes. Concurrent booking attempts rejected at API level using optimistic locking in PostgreSQL. No double-bookings possible.</p>
+      <div class="tech-pills"><span class="pill gold">PostgreSQL locks</span><span class="pill orange">Redis TTL</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Policy Engine</div>
+      <h5>Rescheduling & Cancellation Rules</h5>
+      <p>MHU can reschedule up to 24 hours before session at no cost. Within 24 hours: reschedule fee applies. No-shows: full session fee charged, MHP receives 80%. All rules configurable from admin panel. Refund triggered automatically via Razorpay API.</p>
+      <div class="tech-pills"><span class="pill red">Policy Engine</span><span class="pill gold">Razorpay Refund</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Reminders</div>
+      <h5>Automated Notification Cadence</h5>
+      <p>Booking confirmation → 24hr reminder → 1hr reminder → 15min pre-session → post-session check-in. Each via push (FCM), WhatsApp (Wati/MSG91), or SMS based on user preference. Reminder cadence configurable per user in settings.</p>
+      <div class="tech-pills"><span class="pill orange">FCM</span><span class="pill green">MSG91</span><span class="pill blue">Wati</span></div>
+    </div>
+  </div>
+
+  <h3 class="section-head">3.6 In-App Video Sessions</h3>
+  <table class="stack-table">
+    <thead><tr><th>Component</th><th>Specification</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td>Video Infrastructure</td><td>Phase 1: Third-party SDK (Agora or Daily.co) for reliability and time-to-market. Phase 2: In-house WebRTC with STUN/TURN servers on AWS. Per-minute costs eliminated in Phase 2. Full control over recording, encryption, and quality management.</td><td><span class="pill gold">P1: SDK</span> <span class="pill green">P2: WebRTC</span></td></tr>
+      <tr><td>Session Room</td><td>Session URL generated server-side, valid only for the booked time window ±5 minutes. Room auto-closes after session duration. Both MHU and MHP must authenticate before entering. Session state managed via WebSocket connection.</td><td><span class="pill blue">All phases</span></td></tr>
+      <tr><td>In-Session Chat</td><td>Supplementary text chat alongside video for link sharing, exercises, or when audio is unavailable. Chat transcript stored encrypted post-session. MHU can request transcript download with MHP consent.</td><td><span class="pill blue">All phases</span></td></tr>
+      <tr><td>Network Fallback</td><td>Adaptive bitrate streaming. If video degrades below threshold, auto-switches to audio-only. Session timer pauses on full connection drop. Both parties receive reconnection prompts. Dropped time deducted from session duration.</td><td><span class="pill green">All phases</span></td></tr>
+      <tr><td>AI Note-Taking</td><td>With explicit consent, AI listens to session audio (speech-to-text via self-hosted Whisper) and generates structured session summary: key themes, goals, homework, follow-up questions. Reviewed and finalised by MHP before it's saved to archive.</td><td><span class="pill purple">Phase 2</span></td></tr>
+      <tr><td>Session Recording</td><td>Optional, with explicit informed consent from both parties before session. Recording stored encrypted in S3. Accessible only to MHU from their archive. MHP does not retain recordings. Legal consent logged before recording begins.</td><td><span class="pill purple">Phase 2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">3.7 Crisis Detection & Escalation System</h3>
+  <div class="callout red">
+    <div class="callout-title">Clinical Safety Requirement — Non-Negotiable</div>
+    This system must be designed in consultation with Shreya before development begins. It is a clinical safety feature, not a product feature — it must meet clinical standards for crisis protocol, not just software standards for notifications.
+  </div>
+  <div class="journey">
+    <div class="journey-step">
+      <div class="journey-num">1</div>
+      <div class="journey-content">
+        <h5>Signal Detection</h5>
+        <p>All AI companion messages, journal entries, and mood logs run through a real-time risk classification model. Flags for: suicidal ideation keywords, acute distress language, expressions of hopelessness, sudden sharp mood drops (≥4 points on 1–10 scale). <span class="pill red">Custom NLP classifier</span></p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">2</div>
+      <div class="journey-content">
+        <h5>Severity Assignment</h5>
+        <p>Flagged signals assigned: Low (below-threshold but notable), Medium (concerning pattern), High (immediate risk language). Each level triggers a different protocol. High always triggers human escalation.</p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">3</div>
+      <div class="journey-content">
+        <h5>MHU-Facing Response</h5>
+        <p>Companion shifts tone. SOS resources surfaced (iCall, Vandrevala Foundation, NIMHANS helplines). Option to call helpline directly from within the app. Option to trigger emergency alert to pre-registered trusted contact.</p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">4</div>
+      <div class="journey-content">
+        <h5>MHP Notification</h5>
+        <p>If MHU has assigned MHP, a push notification and in-app alert is sent immediately with anonymised risk flag (severity level and timestamp only, no conversation content). MHP can acknowledge and reach out within the platform.</p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">5</div>
+      <div class="journey-content">
+        <h5>Admin Logging & Clinical Review</h5>
+        <p>All crisis flag events logged in access-controlled audit table. Reviewed by clinical lead (Shreya) weekly. Pattern analysis used to improve classifier accuracy. No individual MHU data accessible to non-clinical admin staff.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="section-head">3.8 Personal Mental Health Archive</h3>
+  <table class="stack-table">
+    <thead><tr><th>Archive Component</th><th>Content</th><th>Access Control</th></tr></thead>
+    <tbody>
+      <tr><td>Session History</td><td>All past sessions — date, MHP, duration, session type, AI-generated summary reviewed by MHP. Downloadable as PDF with one tap.</td><td>MHU only. MHP sees only their own sessions.</td></tr>
+      <tr><td>Mood History</td><td>Complete mood log with timestamps, emotion tags, journal entries, and trend charts. Exportable as CSV.</td><td>MHU only. Shared with MHP with explicit consent toggle.</td></tr>
+      <tr><td>Companion Logs</td><td>Full searchable history of AI companion conversations. User can delete individual entries or entire periods. Deletion is immediate and permanent — no soft deletes.</td><td>MHU only. Never accessible to MHP or Admin without one-time explicit consent.</td></tr>
+      <tr><td>Shared Documents</td><td>Resources, worksheets, and homework sent by MHP during or between sessions. Organised by session. Version-controlled if MHP updates a document.</td><td>MHU + assigned MHP.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">3.9 Personalised Plans & Wellness Resources</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Goal Setting</div>
+      <h5>Weekly Goals Engine</h5>
+      <p>AI companion sets 2–3 personalised weekly goals based on triage profile and recent conversations. Small, achievable, positively framed. Completion tracked via daily check-in. MHP can review and suggest goals from their portal.</p>
+      <div class="tech-pills"><span class="pill green">AI Goal Engine</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Exercises</div>
+      <h5>Guided DIY Activities</h5>
+      <p>Evidence-based exercise library: guided breathing, body scans, CBT thought records, grounding techniques, journaling prompts. Curated by Shreya. Personalised recommendations surfaced by companion based on current emotional state.</p>
+      <div class="tech-pills"><span class="pill gold">Content CMS</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Community</div>
+      <h5>Moderated Peer Support (Phase 2)</h5>
+      <p>Opt-in anonymous community forums organised by theme (anxiety, grief, relationships). Strictly moderated — MHPs can contribute. Crisis flag system active in community. Positioned as peer solidarity, not a replacement for professional care.</p>
+      <div class="tech-pills"><span class="pill purple">Phase 2</span><span class="pill red">Moderation Engine</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Newsletters</div>
+      <h5>Mental Wellness Content</h5>
+      <p>Weekly curated newsletter delivered via email/WhatsApp. Content sourced from MHP contributors on the platform. Personalised by user's triage profile — a user flagged for anxiety receives anxiety-focused content, not general wellness tips.</p>
+      <div class="tech-pills"><span class="pill blue">AWS SES</span><span class="pill green">Wati</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="mhp">
+  <div class="section-number">04 · Product — Mental Health Professional (MHP)</div>
+  <h2 class="page-title">The Complete MHP Experience</h2>
+  <p>MHPs are the platform's supply side — their satisfaction, efficiency, and trust in the platform is as critical as MHU satisfaction. Every feature is designed to reduce administrative overhead so MHPs can focus entirely on clinical work.</p>
+
+  <h3 class="section-head">4.1 MHP Onboarding & Verification</h3>
+  <div class="callout gold">
+    <div class="callout-title">India-Specific Constraint</div>
+    There is no automated API to verify RCI (Rehabilitation Council of India) or MCI (Medical Council of India) credentials in India. Verification is a manual process managed through the admin panel. MHPs are not visible to any MHU until verification status is "Active."
+  </div>
+  <div class="journey">
+    <div class="journey-step">
+      <div class="journey-num">1</div>
+      <div class="journey-content">
+        <h5>Profile Registration</h5>
+        <p>MHP registers with: full name, email, mobile, professional registration number, qualifications, specialisations (multi-select from curated clinical list), languages spoken, years of experience, professional bio. Photo required. <span class="pill blue">PostgreSQL</span></p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">2</div>
+      <div class="journey-content">
+        <h5>Document Upload</h5>
+        <p>MHP uploads: degree certificates, registration certificate, government ID, additional certifications. Documents stored in S3 with restricted IAM access. Each document assigned status: pending → verified → active. <span class="pill green">S3 + IAM</span></p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">3</div>
+      <div class="journey-content">
+        <h5>Admin Verification Review</h5>
+        <p>Admin team reviews documents via admin panel queue. Document-by-document approval or rejection with reason notes. MHP notified at each status change via email + push. Verification typically 48–72 hours. Clock shown in MHP dashboard.</p>
+      </div>
+    </div>
+    <div class="journey-step">
+      <div class="journey-num">4</div>
+      <div class="journey-content">
+        <h5>Profile Activation & Setup</h5>
+        <p>Once verified: MHP sets availability windows (recurring weekly + blocked dates), session rate per hour, maximum daily session cap, session format preferences, and payout bank account (Razorpay KYC). Profile goes live to MHUs.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="section-head">4.2 MHP Dashboard & Scheduling Assistant</h3>
+  <table class="stack-table">
+    <thead><tr><th>Feature</th><th>Specification</th><th>Tech</th></tr></thead>
+    <tbody>
+      <tr><td>Calendar View</td><td>Weekly and monthly calendar showing all booked sessions, available slots, blocked periods. Colour-coded by status (confirmed, pending, completed, cancelled, no-show). Real-time sync with PostgreSQL scheduling tables.</td><td><span class="pill blue">Next.js Calendar</span></td></tr>
+      <tr><td>Availability Management</td><td>MHP sets recurring availability (e.g., Mon–Fri 10am–6pm with 30-min buffer). Can block individual dates, add holiday periods, set daily session cap. Changes propagate to MHU-visible slots within 60 seconds via Redis cache invalidation.</td><td><span class="pill orange">Redis cache</span> <span class="pill gold">PostgreSQL</span></td></tr>
+      <tr><td>Pre-Session Brief</td><td>30 minutes before each session, MHP receives AI-generated brief: MHU's recent mood trends, key companion conversation themes (with MHU consent), previous session summary, and suggested focus areas. MHP can dismiss or use as reference.</td><td><span class="pill purple">AI Brief Engine</span></td></tr>
+      <tr><td>One-Click Session Join</td><td>"Join Session" button appears in MHP dashboard 5 minutes before scheduled start. Authenticated room entry, video interface launches in same web portal. No app-switching required.</td><td><span class="pill green">WebRTC / SDK</span></td></tr>
+      <tr><td>Note-Taking Interface</td><td>Split-screen during session: video left, structured note template right. Template pre-populated with previous session goals. MHP fills: session observations, next session goals, homework assigned, risk flags (manual). Saved on session close. All fields encrypted at rest.</td><td><span class="pill blue">Next.js</span> <span class="pill gold">Encrypted fields</span></td></tr>
+      <tr><td>Patient History Access</td><td>MHP can view full history of their assigned MHUs: all past session notes (their own only), mood trend charts (with MHU consent), referral documents, homework completion rates. Cannot see AI companion logs without explicit one-time MHU consent.</td><td><span class="pill red">RBAC enforced</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">4.3 Payout & Financial Dashboard</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Payout Schedule</div>
+      <h5>Post-Session Payments</h5>
+      <p>MHP paid within 24 hours of session completion via Razorpay Route. Platform retains configurable commission percentage, remainder transferred to MHP's linked bank account. All splits logged in PostgreSQL.</p>
+      <div class="tech-pills"><span class="pill gold">Razorpay Route</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Earnings Dashboard</div>
+      <h5>Financial History</h5>
+      <p>Total earnings this month, last month, cumulative. Per-session breakdown: date, MHU identifier (anonymised), duration, gross fee, platform commission, net payout. Downloadable as CSV for tax filing purposes.</p>
+      <div class="tech-pills"><span class="pill blue">Next.js</span><span class="pill green">CSV Export</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Growth Features</div>
+      <h5>Professional Visibility</h5>
+      <p>MHPs can submit articles for the platform newsletter (reviewed by clinical lead), host group webinars (ticketed, 70/30 revenue split), and access a supervision track for senior therapists to mentor junior practitioners on the platform.</p>
+      <div class="tech-pills"><span class="pill purple">Webinar Module</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Rate Management</div>
+      <h5>Pricing Control</h5>
+      <p>MHPs set own per-session rate within platform-defined floor and ceiling (configurable from admin). Rate changes take effect from next booking — existing confirmed sessions honoured at original rate. Rate change history logged.</p>
+      <div class="tech-pills"><span class="pill gray">Rate Service</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="admin">
+  <div class="section-number">05 · Product — Admin Dashboard</div>
+  <h2 class="page-title">Internal Operations Command Centre</h2>
+  <p>The admin dashboard is operationally critical. It is the interface through which the Mindfully Yours team manages quality, compliance, and business performance. Access is tiered — not all admin users have the same data visibility.</p>
+
+  <h3 class="section-head">5.1 Admin Access Tiers</h3>
+  <table class="stack-table">
+    <thead><tr><th>Role</th><th>Access Level</th><th>Data Visible</th></tr></thead>
+    <tbody>
+      <tr><td>Super Admin</td><td>Unrestricted</td><td>All MHU/MHP data, all financials, all settings, audit logs, risk flags</td></tr>
+      <tr><td>Clinical Lead (Shreya)</td><td>Clinical + Crisis</td><td>Anonymised MHU clinical data, crisis flag logs, MHP quality reports — no financial data</td></tr>
+      <tr><td>Operations Admin</td><td>Ops Only</td><td>MHP verification queue, complaint tickets, MHU/MHP management — no clinical data</td></tr>
+      <tr><td>Finance Admin</td><td>Finance Only</td><td>Payment reports, payout logs, refund management, Razorpay reconciliation</td></tr>
+      <tr><td>Content Admin</td><td>Content Only</td><td>Resource library, newsletter submissions, webinar scheduling, CMS access</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">5.2 MIS & Analytics Dashboards</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">MHU Analytics</div>
+      <h5>User Funnel & Engagement</h5>
+      <p>Tracks: registrations → companion interactions → first booking → session completion → repeat sessions. Dropout analysis at each funnel stage. Most-used features heatmap. Referral source attribution (UTM-based). All data anonymous at individual level.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">MHP Analytics</div>
+      <h5>Professional Performance</h5>
+      <p>Session load per MHP, ratings and trend, MHU retention per MHP, complaint count and type, no-show rates, cancellation rates. Flagging system for MHPs below quality threshold. Monthly performance reports for clinical lead.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Financials</div>
+      <h5>Revenue Dashboard</h5>
+      <p>Gross revenue, platform commission, total MHP payouts, refunds issued, net revenue by period. Session revenue by specialisation type. Razorpay reconciliation view — matches platform records against Razorpay transaction logs daily.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Complaints</div>
+      <h5>Ticket Resolution Flow</h5>
+      <p>MHU or MHP can raise a complaint in-app. Categorised (technical, clinical, billing, conduct). Assigned to relevant admin tier. Status tracked: open → in review → resolved. SLA timers visible. Escalation triggered if SLA is breached.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="ai">
+  <div class="section-number">06 · AI & Triage Engine</div>
+  <h2 class="page-title">How the Intelligence Layer Works</h2>
+  <p>The AI engine is the most technically complex and clinically sensitive component of the platform. Built correctly, it is also the biggest competitive moat — one that cannot be easily replicated. This section describes the full architecture of the AI layer.</p>
+
+  <div class="callout purple">
+    <div class="callout-title">Architecture Principle</div>
+    The AI engine is NOT a general-purpose LLM wrapper. It is a structured system where a purpose-built orchestration layer controls what the LLM can and cannot say, what tools it can access, and how outputs are validated before reaching the user. Clinical safety requires this level of control.
+  </div>
+
+  <table class="stack-table">
+    <thead><tr><th>Layer</th><th>Function</th><th>Technology</th></tr></thead>
+    <tbody>
+      <tr><td>Orchestration Layer</td><td>Controls conversation flow. Manages companion "modes" (casual check-in, triage, crisis, between-session support). Enforces guardrails — topics the companion must redirect (medical diagnosis, medication advice). Written as a NestJS state machine.</td><td><span class="pill green">NestJS</span> <span class="pill blue">State Machine</span></td></tr>
+      <tr><td>LLM Integration</td><td>Calls to Claude Sonnet or GPT-4 via API for conversational generation. Every call includes: system prompt (role, guardrails, tone), conversation history (last N messages), retrieved memory context (RAG), and current emotional state vector.</td><td><span class="pill purple">Anthropic API / OpenAI</span></td></tr>
+      <tr><td>Memory & RAG</td><td>After each conversation, key information extracted and embedded. Stored in a vector database. Retrieved by semantic similarity at start of each new session. Enables cross-session memory without sending full conversation history to LLM.</td><td><span class="pill blue">pgvector / Pinecone</span> <span class="pill gold">Embedding API</span></td></tr>
+      <tr><td>Triage Protocol</td><td>PHQ-9, GAD-7 questions distributed conversationally across multiple turns. Scoring calculated server-side, never exposed as a raw score to the user. Output maps to: wellbeing support (companion only) / mild clinical need / moderate-severe / crisis.</td><td><span class="pill green">Scoring Service</span> <span class="pill red">Crisis Classifier</span></td></tr>
+      <tr><td>Output Safety Layer</td><td>Every LLM output checked before reaching user: no diagnostic language, no medication recommendations, no explicit descriptions of self-harm methods. Violations logged and used to improve system prompt guardrails iteratively.</td><td><span class="pill red">Safety Classifier</span> <span class="pill orange">Moderation API</span></td></tr>
+      <tr><td>Matchmaking Algorithm</td><td>Triggered after triage completion. Takes MHU profile vector (condition flags, language, location, preferences) and runs against MHP database using weighted cosine similarity. Returns top 3 ranked matches with plain-language explanation. Weights configurable from admin panel.</td><td><span class="pill purple">Matching Engine</span> <span class="pill gold">PostgreSQL</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">6.1 Apple Guideline 1.4.2 Compliance</h3>
+  <div class="callout red">
+    <div class="callout-title">App Store Risk — Must Address at Design Stage</div>
+    Apple's Guideline 1.4.2 requires mental health apps not to suggest, imply, or replace professional diagnosis. Violations cause App Store rejection and affect in-app language, AI output formatting, and onboarding copy — not just App Store metadata.
+  </div>
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-dot done">✓</div>
+      <div class="check-text"><strong>Language Guardrails in AI Output</strong> All AI outputs use "self-reflection" or "check-in" framing — never diagnostic. "Based on what you've shared, you might benefit from speaking to a professional" vs "You appear to have moderate depression."</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot done">✓</div>
+      <div class="check-text"><strong>Onboarding Disclosure</strong> First screen clearly states the companion is not a medical professional and does not provide diagnosis or medical advice. Always consult a qualified professional for medical concerns.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot done">✓</div>
+      <div class="check-text"><strong>App Store Metadata</strong> App Store description avoids diagnostic language. Category: "Health & Fitness" not "Medical." Privacy policy explicitly states data usage and AI/LLM involvement.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot req">!</div>
+      <div class="check-text"><strong>Clinical Review of AI Prompts</strong> All system prompts and guardrail language must be reviewed by Shreya before App Store submission. Any post-launch changes to AI behaviour require re-review by clinical lead.</div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="stack">
+  <div class="section-number">07 · Technology Stack</div>
+  <h2 class="page-title">Every Technology Decision, Explained</h2>
+  <p>Decisions are driven by developer availability in the Indian market, long-term maintainability, and the specific requirements of a sensitive data platform. Every choice below has a rationale.</p>
+
+  <h3 class="section-head">7.1 Frontend & Mobile</h3>
+  <table class="stack-table">
+    <thead><tr><th>Layer</th><th>Technology</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>Mobile App</td><td><code>Flutter 3.x</code></td><td>Single codebase for iOS and Android. Dart is strongly typed — reduces runtime bugs in a safety-critical app. Rich widget ecosystem. Strong Indian developer community. State via Riverpod, navigation via GoRouter.</td></tr>
+      <tr><td>Web Portals</td><td><code>Next.js 14 (App Router)</code></td><td>SSR for SEO on MHU portal. React Server Components for performance. Built-in API routes for lightweight BFF layer. Role-based routing cleanly separated per portal. TypeScript throughout.</td></tr>
+      <tr><td>Admin Dashboard</td><td><code>Next.js + Shadcn/ui</code></td><td>Rapid development using Shadcn component library. Consistent design system. TypeScript. Internal tool — not performance-critical, but SSR maintained for consistency.</td></tr>
+      <tr><td>State Management</td><td><code>Riverpod 2.x</code></td><td>Compile-safe provider graph. Supports async states (AsyncValue), making API integration clean. Testable without BuildContext. Industry standard for production Flutter apps.</td></tr>
+      <tr><td>Local Storage</td><td><code>flutter_secure_storage</code></td><td>Auth tokens and sensitive preferences stored in device Keychain (iOS) / Keystore (Android). Never in SharedPreferences (unencrypted). Critical for DPDP Act compliance.</td></tr>
+      <tr><td>CSS (Web)</td><td><code>Tailwind CSS</code></td><td>Utility-first CSS for rapid consistent styling. Custom design tokens for brand consistency. Zero runtime CSS overhead.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">7.2 Backend & API</h3>
+  <table class="stack-table">
+    <thead><tr><th>Layer</th><th>Technology</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>Runtime</td><td><code>Node.js 20 LTS</code></td><td>Non-blocking I/O ideal for real-time features (WebSocket sessions, notifications). Same language as frontend — reduces context switching. Large ecosystem for healthcare and encryption libraries.</td></tr>
+      <tr><td>Framework</td><td><code>NestJS</code></td><td>Opinionated modular structure forces clean service separation. Dependency injection makes testing straightforward. Decorators for RBAC guards, validation, logging. Built-in WebSocket support. Preferred over raw Express for complex multi-service backend.</td></tr>
+      <tr><td>API Protocol</td><td><code>REST + WebSocket</code></td><td>REST for all standard CRUD operations. Socket.io for: video session signalling, live companion chat, and admin notification push. GraphQL rejected — overkill for defined client needs, harder to secure for sensitive data.</td></tr>
+      <tr><td>Authentication</td><td><code>Custom JWT + OTP</code></td><td>JWT access tokens (15-minute expiry) + refresh tokens (30-day, HttpOnly cookies). OTP via MSG91. bcrypt (cost factor 12). Role claims in JWT payload. Custom over Firebase Auth for full control over token lifecycle and DPDP compliance.</td></tr>
+      <tr><td>Validation</td><td><code>class-validator</code></td><td>All incoming request bodies validated with decorators. Invalid requests rejected before reaching service layer. Reduces injection attack surface area.</td></tr>
+      <tr><td>API Docs</td><td><code>Swagger / OpenAPI 3.0</code></td><td>Auto-generated from NestJS decorators. Available only in dev/staging — never production. Essential for multi-team development coordination.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">7.3 Databases</h3>
+  <table class="stack-table">
+    <thead><tr><th>Database</th><th>Technology</th><th>Used For</th></tr></thead>
+    <tbody>
+      <tr><td>Primary (Relational)</td><td><code>PostgreSQL 16</code> on AWS RDS</td><td>All structured data: user profiles, MHP profiles, booking records, payment transactions, session metadata, notification logs, RBAC tables, audit trails, compliance records. Multi-AZ for high availability. pgvector extension for AI embeddings (Phase 2).</td></tr>
+      <tr><td>Secondary (Document)</td><td><code>MongoDB</code> on AWS DocumentDB</td><td>AI companion conversation logs, mood tracking time-series, AI-generated session summaries, document metadata, unstructured assessment outputs. Schema-flexible — conversation structure evolves as AI model develops.</td></tr>
+      <tr><td>Cache</td><td><code>Redis 7.x</code> on AWS ElastiCache</td><td>Session data caching, rate limiting counters, slot-locking TTL keys, notification deduplication, real-time presence indicators, API response caching for MHP listing queries.</td></tr>
+      <tr><td>Vector Store</td><td><code>pgvector</code> (P1) / <code>Pinecone</code> (P2)</td><td>Stores embeddings of companion conversation summaries for RAG retrieval. pgvector in PostgreSQL for Phase 1 simplicity. Dedicated vector DB at scale.</td></tr>
+      <tr><td>Search (Phase 2)</td><td><code>AWS OpenSearch</code></td><td>Full-text search across MHP profiles (bio, specialisations), resource library, and admin MIS search. Managed service for compliance.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">7.4 Third-Party Services</h3>
+  <table class="stack-table">
+    <thead><tr><th>Service</th><th>Provider</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td>Payments</td><td><code>Razorpay + Route</code></td><td>Payment collection from MHUs. Multi-party split payouts to MHPs via Razorpay Route. Refund management. Webhook verification for payment status. Business KYC required before Route activation. Test environment fully configured before production.</td></tr>
+      <tr><td>Push Notifications</td><td><code>Firebase Cloud Messaging</code></td><td>All push notifications to mobile: session reminders, booking confirmations, crisis alerts, between-session nudges. Token management via Firebase SDK in Flutter. Preference management server-side.</td></tr>
+      <tr><td>SMS + WhatsApp</td><td><code>MSG91 / Wati</code></td><td>OTP delivery via MSG91. WhatsApp session reminders via Wati (WhatsApp Business API). Fallback: if push not delivered within 5 minutes, SMS triggered automatically.</td></tr>
+      <tr><td>AI / LLM</td><td><code>Anthropic (Claude) or OpenAI</code></td><td>Natural language generation for companion conversations, session summaries, and between-session personalisation. Provider abstracted behind internal LLM service — can switch without re-architecting. Rate limiting and cost tracking via internal middleware.</td></tr>
+      <tr><td>Speech-to-Text</td><td><code>Whisper (self-hosted)</code></td><td>Session transcription for AI note-taking. Self-hosted on EC2 for data sovereignty — audio never leaves AWS infrastructure. India-language support critical for Phase 2.</td></tr>
+      <tr><td>Video (Phase 1)</td><td><code>Agora / Daily.co</code></td><td>Phase 1 fallback for reliability. Per-minute cost model. SDK integrated in Flutter and Next.js. Replaced by in-house WebRTC in Phase 2 to eliminate per-minute costs at scale.</td></tr>
+      <tr><td>Email</td><td><code>AWS SES</code></td><td>Transactional emails: registration, booking receipts, session summaries, MHP payout notifications. SPF/DKIM authentication. Bounce and complaint tracking.</td></tr>
+      <tr><td>Analytics</td><td><code>Mixpanel / Amplitude</code></td><td>Product analytics — funnel tracking, feature usage, retention cohorts. All events anonymised before sending (no PII transmitted). Available to product team, not clinical team.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page" id="infra">
+  <div class="section-number">08 · Infrastructure</div>
+  <h2 class="page-title">AWS Architecture — Every Service Specified</h2>
+  <p>The entire platform is hosted exclusively on AWS (Asia Pacific — Mumbai, <code>ap-south-1</code>). This is non-negotiable for a mental health platform — data sovereignty for Indian users requires data to remain within India.</p>
+
+  <div class="infra-grid">
+    <div class="infra-card">
+      <div class="ic-service">Compute</div>
+      <h6>EC2 (Auto-Scaling)</h6>
+      <p>Backend API on EC2 t3.medium instances. Auto-scaling groups: min 2, max 10. Application Load Balancer with health checks. Separate target groups for API and WebSocket connections.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Database</div>
+      <h6>RDS PostgreSQL</h6>
+      <p>db.t3.medium Multi-AZ. Automated daily backups, 30-day retention. Point-in-time recovery. Storage auto-scaling. AES-256 encryption at rest. VPC-only access.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Document DB</div>
+      <h6>DocumentDB / Atlas</h6>
+      <p>MongoDB-compatible managed service for conversation logs, mood data, session summaries. Encrypted at rest and in transit. Automated backups. Clustered for horizontal read scaling.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Cache</div>
+      <h6>ElastiCache Redis</h6>
+      <p>Redis 7 cluster mode. Two primary shards, one replica each. TLS in-transit. Auth token required. VPC-only access. Used for slot locking, rate limiting, presence indicators.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Storage</div>
+      <h6>S3 (Encrypted)</h6>
+      <p>All file storage: MHP credentials, session documents, user uploads, AI-generated PDFs. SSE-S3 encryption. IAM role-based access only. Versioning enabled. No public read access.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">CDN</div>
+      <h6>CloudFront</h6>
+      <p>Static assets for web portals. Signed URLs for sensitive S3 content. Edge caching in Mumbai, Delhi, Chennai, Bangalore, Hyderabad. WAF integration for rate limiting.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">CI/CD</div>
+      <h6>GitHub Actions + ECR</h6>
+      <p>All deployments via GitHub Actions pipelines. Docker images built and pushed to AWS ECR. Rolling deployments via CodeDeploy. Automated test gates on every merge to main.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Monitoring</div>
+      <h6>CloudWatch + Sentry</h6>
+      <p>CloudWatch for infrastructure metrics and alerting. Sentry for application error tracking. PagerDuty for on-call P1 alerts. Uptime monitoring via Route53 health checks.</p>
+    </div>
+    <div class="infra-card">
+      <div class="ic-service">Secrets</div>
+      <h6>AWS Secrets Manager</h6>
+      <p>All API keys, database credentials, JWT secrets stored in Secrets Manager. Automatic rotation for database credentials. Accessed at runtime — no secrets in code repositories.</p>
+    </div>
+  </div>
+
+  <h3 class="section-head">8.1 Environment Strategy</h3>
+  <table class="stack-table">
+    <thead><tr><th>Environment</th><th>Purpose</th><th>Data</th><th>Access</th></tr></thead>
+    <tbody>
+      <tr><td>Development</td><td>Individual developer work. Feature branches.</td><td>Seeded synthetic data only. No real user data ever in dev.</td><td>All developers</td></tr>
+      <tr><td>Staging (UAT)</td><td>Pre-release testing. Client review. QA.</td><td>Anonymised copy of production structure. Razorpay test mode.</td><td>Dev team + client + QA</td></tr>
+      <tr><td>Production</td><td>Live platform. Real users.</td><td>All real data. Razorpay live mode. Full encryption applied.</td><td>Automated deployments only. No developer SSH in normal operations.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page" id="security">
+  <div class="section-number">09 · Security & Privacy</div>
+  <h2 class="page-title">Protecting the Most Sensitive Data a Platform Can Hold</h2>
+  <p>Mental health data is among the most sensitive personal data in existence. A breach on this platform would not just be a business failure — it could cause direct harm to vulnerable individuals. Security shapes every architectural decision, not just a compliance checklist appended at the end.</p>
+
+  <h3 class="section-head">9.1 Encryption Strategy</h3>
+  <table class="stack-table">
+    <thead><tr><th>Layer</th><th>Encryption Method</th><th>Scope</th></tr></thead>
+    <tbody>
+      <tr><td>In Transit</td><td>TLS 1.3 enforced on all connections. HSTS headers on web portals. Certificate managed via AWS ACM.</td><td>All API calls, WebSocket connections, CDN requests, database connections</td></tr>
+      <tr><td>At Rest (DB)</td><td>AES-256 encryption on all RDS and DocumentDB instances. AWS-managed KMS keys.</td><td>All database storage across all environments</td></tr>
+      <tr><td>At Rest (Files)</td><td>SSE-S3 with customer-managed KMS key. Key rotation annually.</td><td>All S3 objects: documents, credentials, session recordings</td></tr>
+      <tr><td>Application-Level</td><td>Field-level encryption on: session notes, AI companion content, assessment scores, medication records. Encrypted before storage, decrypted only in authorised service context. Encryption key separate from DB access key.</td><td>Highest-sensitivity clinical data fields only</td></tr>
+      <tr><td>Mobile Storage</td><td>flutter_secure_storage for all on-device sensitive data. Keychain (iOS), Keystore (Android). No sensitive data in SharedPreferences.</td><td>Auth tokens, cached user session state</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">9.2 RBAC Enforcement Rules</h3>
+  <div class="callout red">
+    <div class="callout-title">RBAC Must Be API-Level, Not Just Frontend</div>
+    An MHP or MHU could construct raw API calls bypassing the frontend entirely. RBAC guards must be enforced in NestJS middleware on every API route — the frontend is a convenience layer, not a security boundary.
+  </div>
+  <table class="stack-table">
+    <thead><tr><th>Rule</th><th>Enforcement</th></tr></thead>
+    <tbody>
+      <tr><td>MHU cannot access any other MHU's data</td><td>Every query includes mandatory <code>WHERE user_id = :authenticated_user_id</code>. ORM-level scope guard applied globally to MHU entity queries.</td></tr>
+      <tr><td>MHP cannot access another MHP's patient records</td><td>All patient data access enforced via join through therapist-patient assignment table. Query returns empty set — not 403 — to prevent enumeration attacks.</td></tr>
+      <tr><td>MHP cannot access AI companion logs without MHU consent</td><td>Companion log access blocked at API route level unless a valid, timestamped consent record exists in the consent table for that MHU-MHP pair.</td></tr>
+      <tr><td>Admin cannot access individual clinical data</td><td>Admin analytics queries use pre-aggregated anonymised views. Direct queries to clinical tables blocked for non-clinical admin roles at database role permission level, not just API guards.</td></tr>
+      <tr><td>All clinical data access is logged</td><td>Every API request accessing clinical data logged to a separate append-only audit table: timestamp, user ID, role, resource accessed, action type. Audit table has no DELETE permission granted to any role.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page" id="data">
+  <div class="section-number">10 · Data Architecture</div>
+  <h2 class="page-title">Schema Design & Data Governance</h2>
+
+  <h3 class="section-head">10.1 Core Entity Map</h3>
+  <table class="stack-table">
+    <thead><tr><th>Entity</th><th>Database</th><th>Key Fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>users</code></td><td>PostgreSQL</td><td>id, phone_hash, email_hash, role (mhu/mhp/admin), created_at, status, consent_version</td></tr>
+      <tr><td><code>mhu_profiles</code></td><td>PostgreSQL</td><td>user_id (FK), preferred_language, location_lat/lng, onboarding_completed, triage_level, assigned_mhp_id</td></tr>
+      <tr><td><code>mhp_profiles</code></td><td>PostgreSQL</td><td>user_id (FK), registration_number, specialisations[], languages[], session_rate, verification_status, rating_avg, payout_account_id</td></tr>
+      <tr><td><code>sessions</code></td><td>PostgreSQL</td><td>id, mhu_id, mhp_id, scheduled_at, status, session_type, duration_minutes, payment_id, room_token</td></tr>
+      <tr><td><code>payments</code></td><td>PostgreSQL</td><td>id, session_id, razorpay_order_id, amount, platform_share, mhp_share, status, payout_id, refund_id</td></tr>
+      <tr><td><code>mhp_availability</code></td><td>PostgreSQL</td><td>mhp_id, day_of_week, start_time, end_time, max_sessions_per_day, buffer_minutes</td></tr>
+      <tr><td><code>companion_conversations</code></td><td>MongoDB</td><td>mhu_id, session_date, messages[], triage_score, risk_flags[], embedding_id</td></tr>
+      <tr><td><code>mood_logs</code></td><td>MongoDB</td><td>mhu_id, timestamp, score, emotions[], journal_text (encrypted), linked_conversation_id</td></tr>
+      <tr><td><code>session_notes</code></td><td>PostgreSQL (encrypted)</td><td>session_id, mhp_id, content_encrypted, goals_encrypted, risk_flags, homework_assigned, created_at</td></tr>
+      <tr><td><code>consents</code></td><td>PostgreSQL</td><td>mhu_id, consent_type, granted_to_id, granted_at, expires_at, revoked_at, consent_text_version</td></tr>
+      <tr><td><code>audit_logs</code></td><td>PostgreSQL (append-only)</td><td>timestamp, actor_id, actor_role, resource_type, resource_id, action, ip_address</td></tr>
+      <tr><td><code>crisis_flags</code></td><td>PostgreSQL</td><td>mhu_id, triggered_at, severity_level, source (companion/mood/journal), resolved_at, resolver_id</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-head">10.2 Data Retention Policy</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-tag">Active Users</div>
+      <h5>Retained While Account Active</h5>
+      <p>All clinical data, session history, companion logs, and mood data retained for the lifetime of an active account. User can delete individual entries at any time. Deletion is immediate and permanent — no soft deletes for clinical data.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Deleted Accounts</div>
+      <h5>30-Day Deletion Window</h5>
+      <p>On account deletion: immediate deactivation. PII purged within 30 days. Anonymised aggregate data retained indefinitely. Payment records retained 7 years for tax compliance — anonymised of PII.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Audit Logs</div>
+      <h5>5-Year Retention</h5>
+      <p>Audit logs retained for 5 years for regulatory compliance. Cannot be deleted by any user role — automated retention policy only. Stored in S3 Glacier after 1 year for cost efficiency.</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-tag">Crisis Records</div>
+      <h5>Clinical Retention Period</h5>
+      <p>Crisis flag records retained per Shreya's clinical governance requirements. Minimum 5 years recommended for medico-legal protection. Anonymised for aggregate analysis. Access-controlled to clinical lead only.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="phases">
+  <div class="section-number">11 · Phased Delivery Plan</div>
+  <h2 class="page-title">From Day 1 to Full Platform</h2>
+  <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-label">Phase 1<br>Weeks 1–6</div>
+      <div class="tl-bar-wrap">
+        <div class="tl-title">Foundation — Product, Design, Infrastructure Setup</div>
+        <div class="tl-bar" style="width: 100%; background: var(--accent-light); border: 1px solid var(--accent-mid);"></div>
+        <div class="tl-items">PRD finalisation · Full Figma design system · Brand identity kit · AWS infrastructure provisioned · CI/CD pipelines configured · Database schema design · API architecture documentation · Razorpay KYC initiated · Dev environment live · Crisis protocol designed with Shreya</div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label">Phase 2<br>Weeks 7–16</div>
+      <div class="tl-bar-wrap">
+        <div class="tl-title">Core Build — MHU Mobile App + Backend API</div>
+        <div class="tl-bar" style="width: 100%; background: var(--blue-light); border: 1px solid var(--blue);"></div>
+        <div class="tl-items">Authentication & onboarding flows · AI companion MVP (triage, basic conversation) · Mood tracking system · MHP discovery & matching · Booking & scheduling engine · Payment integration (Razorpay) · Session infrastructure (SDK Phase 1) · Crisis detection system · Push notifications · MHU web portal</div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label">Phase 3<br>Weeks 17–22</div>
+      <div class="tl-bar-wrap">
+        <div class="tl-title">MHP Platform + Admin Dashboard</div>
+        <div class="tl-bar" style="width: 100%; background: var(--gold-light); border: 1px solid var(--gold);"></div>
+        <div class="tl-items">MHP onboarding & verification workflow · MHP web portal (full) · Scheduling assistant · Session notes system · Payout dashboard · Admin panel all modules · MIS reporting · Complaint management · MHP verification queue · Notification & communication layer</div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label">Phase 4<br>Weeks 23–26</div>
+      <div class="tl-bar-wrap">
+        <div class="tl-title">QA, Compliance, App Store & Launch</div>
+        <div class="tl-bar" style="width: 100%; background: var(--purple-light); border: 1px solid var(--purple);"></div>
+        <div class="tl-items">Full regression testing across all surfaces · Apple Guideline 1.4.2 compliance review · DPDP Act audit · Penetration testing · Load testing (target 1000 concurrent users) · App Store submission iOS + Android · Staging UAT with Pranav & Shreya · Production go-live · Handover documentation</div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label">Phase 5<br>Post-Launch</div>
+      <div class="tl-bar-wrap">
+        <div class="tl-title">Advanced AI + Scale Features</div>
+        <div class="tl-bar" style="width: 60%; background: var(--paper-warm); border: 1px solid var(--rule-strong);"></div>
+        <div class="tl-items">In-house WebRTC (replace SDK) · AI session note-taking (Whisper) · Community forums · AWS OpenSearch integration · Supervision features · Webinar infrastructure · RAG memory improvements · Health app sync · Enhanced matchmaking ML</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="compliance">
+  <div class="section-number">12 · Regulatory & Legal Compliance</div>
+  <h2 class="page-title">Building Within India's Legal Framework</h2>
+
+  <h3 class="section-head">12.1 DPDP Act Compliance</h3>
+  <p>India's Digital Personal Data Protection Act (2023) applies fully to this platform. Mental health data is classified as sensitive personal data, requiring additional protections. Compliance must be built from Day 1 — retrofitting is both technically difficult and legally risky.</p>
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-dot req">!</div>
+      <div class="check-text"><strong>Explicit Consent at Every Touchpoint</strong> Granular consent for: data processing, AI companion usage, session recording, data sharing with MHP, analytics, and communications. Consent version tracked — re-consent triggered if consent text changes.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot req">!</div>
+      <div class="check-text"><strong>Data Localisation</strong> All data stored exclusively in AWS ap-south-1 (Mumbai). No cross-border data transfer. LLM API calls designed to minimise PII transmission — conversation summaries sent, not raw identifying data.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot req">!</div>
+      <div class="check-text"><strong>Right to Erasure</strong> Users can request full data deletion from within the app. Immediate deactivation, PII purge within 30 days, anonymised aggregate retention for lawful purposes. Deletion confirmation provided in writing.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot req">!</div>
+      <div class="check-text"><strong>Data Fiduciary Registration</strong> Mindfully Yours Pvt Ltd must register as a Significant Data Fiduciary with the Data Protection Board of India once the framework is fully notified. Legal counsel must track notification dates.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-dot done">✓</div>
+      <div class="check-text"><strong>Grievance Officer Designation</strong> A named Grievance Officer must be designated with contact displayed in-app and on the website. Complaints acknowledged within 72 hours, resolved within 30 days.</div>
+    </div>
+  </div>
+
+  <h3 class="section-head">12.2 Telehealth & Clinical Compliance</h3>
+  <table class="stack-table">
+    <thead><tr><th>Requirement</th><th>Compliance Approach</th></tr></thead>
+    <tbody>
+      <tr><td>Telemedicine Practice Guidelines (MoHFW 2020)</td><td>All MHPs are licensed practitioners. Platform does not facilitate medical prescriptions via the platform (in-scope for Phase 2 with psychiatry — requires additional legal review). Teletherapy (counselling) is clearly within guidelines.</td></tr>
+      <tr><td>RCI / MCI Credential Verification</td><td>Manual verification via admin panel. No MHP goes live without verified credentials. Verification records retained permanently. Annual re-verification reminder system.</td></tr>
+      <tr><td>Informed Consent for AI Features</td><td>Separate explicit consent for: AI companion usage, AI-assisted note-taking, AI session summary generation. Users can opt out of AI features and continue with human-only sessions. Consent logged with timestamp and app version.</td></tr>
+      <tr><td>MHU-MHP Confidentiality</td><td>No lateral data access between MHPs. Breach protocol documented in MHP terms of service. Crisis disclosure exceptions clearly communicated to both MHU and MHP during onboarding.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page" id="risks">
+  <div class="section-number">13 · Risk Register & Mitigations</div>
+  <h2 class="page-title">Known Risks & How We Address Them</h2>
+
+  <div class="risk-item">
+    <div class="risk-badge high">HIGH</div>
+    <div class="risk-text">
+      <h6>AI Companion Clinical Safety Failure</h6>
+      <p>Risk: AI companion produces harmful output — diagnostic language, inappropriate response to crisis signals, or factually wrong clinical information. Impact: direct harm to vulnerable user, legal liability, regulatory action.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> Multi-layer output safety system (Section 6). All system prompts reviewed by Shreya. Fallback to human MHP contact triggered on any clinical uncertainty. Regular red-team testing of AI outputs. Safety classifier runs on every single LLM output.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge high">HIGH</div>
+    <div class="risk-text">
+      <h6>Data Breach of Clinical Records</h6>
+      <p>Risk: Unauthorised access to session notes, companion logs, or assessment data. Impact: severe reputational damage, DPDP Act penalties, direct harm to users whose sensitive mental health data is exposed.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> Field-level encryption on all clinical data. Zero-trust architecture. Annual penetration testing. Incident response plan documented and rehearsed before launch. All data access audit-logged.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge high">HIGH</div>
+    <div class="risk-text">
+      <h6>Apple App Store Rejection</h6>
+      <p>Risk: App rejected under Guideline 1.4.2 for implying diagnosis or mental health claims. Impact: delayed launch, required rework, loss of iOS market.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> Compliance addressed at design stage. Submission includes detailed reviewer notes explaining self-assessment framing. Legal counsel reviews all in-app language before submission.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge med">MED</div>
+    <div class="risk-text">
+      <h6>Razorpay Route KYC Delays</h6>
+      <p>Risk: Razorpay Route KYC process takes 4–8 weeks. Impact: launch delay or inability to pay MHPs at launch.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> Razorpay KYC initiated at Phase 1 start (Week 1). Fallback: manual bank transfers to MHPs while Route is being activated, with reconciliation in admin dashboard.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge med">MED</div>
+    <div class="risk-text">
+      <h6>MHP Supply Shortage at Launch</h6>
+      <p>Risk: Insufficient verified MHPs onboarded before MHU launch creates poor matching or long wait times.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> MHP onboarding and verification begins 6 weeks before MHU-facing launch. Target 30+ verified MHPs across key specialisations, languages, and cities before go-live. Admin tracking dashboard for pipeline visibility.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge med">MED</div>
+    <div class="risk-text">
+      <h6>Video Session Reliability in Tier 2/3 India</h6>
+      <p>Risk: Third-party SDK has poor performance in cities with unreliable connectivity. Impact: poor session experience, MHP and MHU churn.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> SDK chosen for India network performance track record. Adaptive bitrate + audio-only fallback built in. Post-session quality rating prompts to detect patterns. In-house WebRTC planned for Phase 5.</p>
+    </div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-badge low">LOW</div>
+    <div class="risk-text">
+      <h6>LLM Provider API Dependency</h6>
+      <p>Risk: Primary LLM provider changes pricing, has outages, or modifies API in breaking ways.</p>
+      <p style="margin-top:4px; color: var(--accent);"><strong>Mitigation:</strong> LLM provider abstracted behind internal service layer — can switch providers without changes to companion logic. Secondary provider configured as fallback. Graceful degradation if API unavailable.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="pricing">
+  <div class="section-number">14 · Engagement & Pricing</div>
+  <h2 class="page-title">How We Work Together</h2>
+  <p>Two engagement tiers depending on whether you have a development team or need us to manage the full build. Both include the same comprehensive strategy, design, and product management scope — the difference is who writes the code.</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="tier-name">Tier A</div>
+      <div class="price">₹X,XX,XXX</div>
+      <div class="price-label">One-time · Strategy, design & product management</div>
+      <ul>
+        <li>Complete PRD (all three user types, every feature)</li>
+        <li>Full user flow maps — MHU, MHP, Admin (all edge cases)</li>
+        <li>Lo-fi to hi-fi Figma design (all 5 surfaces)</li>
+        <li>Interactive prototype — developer-ready handoff</li>
+        <li>Brand identity kit (logo, color, type, tone of voice)</li>
+        <li>Component library + design tokens</li>
+        <li>Full tech architecture documentation</li>
+        <li>Razorpay KYC & Route setup management</li>
+        <li>AWS infrastructure specification</li>
+        <li>Third-party integration coordination</li>
+        <li>Development management & QA oversight</li>
+        <li>App Store submission & compliance management</li>
+        <li>Go-live support & handover knowledge session</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="tier-name">Tier B — Recommended</div>
+      <div class="price">₹XX,XX,XXX</div>
+      <div class="price-label">One-time · Full build including development</div>
+      <ul>
+        <li>Everything in Tier A, plus full development:</li>
+        <li>Flutter mobile app (MHU + MHP, iOS + Android)</li>
+        <li>Next.js MHU web portal</li>
+        <li>Next.js MHP web portal</li>
+        <li>Admin dashboard — all modules</li>
+        <li>NestJS backend API — full implementation</li>
+        <li>PostgreSQL + MongoDB schema + setup</li>
+        <li>AI companion integration (Phase 1)</li>
+        <li>Razorpay + Razorpay Route full integration</li>
+        <li>Full AWS infrastructure deployment</li>
+        <li>CI/CD pipelines configured</li>
+        <li>QA, UAT, App Store submission</li>
+        <li>26-week delivery from kickoff to launch</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-title">What's Not Included in Either Tier</div>
+    AWS infrastructure running costs (estimated ₹15,000–40,000/month at launch scale). Third-party API costs: LLM API, MSG91/Wati SMS charges, Agora/Daily.co per-minute video charges, Razorpay transaction fees (standard 2%). Legal counsel fees for DPDP compliance review and terms of service drafting.
+  </div>
+
+  <div class="full-row">
+    <h5>Handover Package</h5>
+    <p>At go-live: complete codebase in GitHub repository, all AWS credentials transferred to Mindfully Yours accounts, all third-party account transfers completed, full technical documentation of all systems and connections, and a structured knowledge transfer session with Pranav, Shreya, and your operational team. The platform belongs to you entirely from Day 1 of build.</p>
+  </div>
+
+  <div class="full-row">
+    <h5>Next Step to Proceed</h5>
+    <p>Signed engagement agreement + 30% advance payment + kickoff call with Pranav, Shreya, and our product lead to begin the PRD deep-dive. Timeline begins from kickoff date. Estimated 26 weeks to production go-live for Tier B.</p>
+  </div>
+
+  <div class="divider"></div>
+  <p style="text-align: center; font-family: var(--ff-mono); font-size: 12px; color: var(--ink-muted);">Confidential · Prepared for Mindfully Yours Pvt Ltd · May 2026 · Version 2.0</p>
+</section>
+
+</main>
+
+<script>
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('[id]');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + entry.target.id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+navItems.forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    const id = item.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
